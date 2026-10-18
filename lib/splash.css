@@ -349,7 +349,11 @@
   font-weight: 400;
   letter-spacing: 0.22em;
   text-indent: 0.22em;
-  font-size: 40px;
+  /* dshu-zh-fit 本地补丁：原来固定 40px，而环是 min(56vw, 86vh, 1040px) 会随窗口缩小，
+     窗口一小这行中文大字就比环还宽（"读"字压到环上）。
+     改成跟着环一起缩：按 12em 字宽最多占环径六成反推 → min(2.9vw, 4.4vh)，大窗口封顶 40px、
+     下限 18px 免得小窗口看不清。大窗口下与原来完全一致。 */
+  font-size: clamp(18px, min(2.9vw, 4.4vh), 40px);
 }
 .dsu-caret {
   display: inline-block;
@@ -424,12 +428,16 @@
   opacity: 0.5;
 }
 
-/* 右侧等宽信息行（对应参考片 "· ID CONFIRMED : JOYC"） */
+/* 右侧等宽信息行（对应参考片 "· ID CONFIRMED : JOYC"）
+   本地补丁：原定位 left:calc(50% + 190px) / top:49% 落在居中大标题的右侧延伸区，
+   会与中文大字、英文等宽副标题叠字（窗口越窄越明显）。改挂到右下角、页脚上方，
+   右对齐成一条独立读数，任何宽度下都不会进入居中文字的版心。 */
 .dsu-idline {
   position: absolute;
-  left: calc(50% + 190px);
-  top: 49%;
-  transform: translateY(-50%) translateX(16px);
+  right: 46px;
+  bottom: 104px;
+  text-align: right;
+  transform: translateX(16px);
   z-index: 22;
   font-family: var(--dsu-mono);
   font-size: 12px;
@@ -440,7 +448,7 @@
   transition-delay: 520ms;
   white-space: nowrap;
 }
-.dsu-idline.dsu-in { opacity: 1; transform: translateY(-50%); }
+.dsu-idline.dsu-in { opacity: 1; transform: none; }
 
 /* ── 环形准星（验证通过）───────────────────────────────────────────────── */
 /* 照原片：环居中、直径约 56vw，状态字就落在环心里，两者是一个整体。
@@ -1091,10 +1099,8 @@
   50% { height: 100%; }
 }
 
-/* 窄窗口里右侧那行等宽小字会和环撞上，直接收掉 */
-@media (max-width: 1180px) {
-  .dsu-idline { display: none; }
-}
+/* 本地补丁：该行已挪到右下角，无需再隐藏
+   （原文：窄窗口里右侧那行等宽小字会和环撞上，直接收掉） */
 
 /* 无障碍：尊重系统"减少动态效果" */
 @media (prefers-reduced-motion: reduce) {
